@@ -1,41 +1,48 @@
-name: Build Electron App
+name: Multi-Platform Electron Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }}
+        os: [macos-latest, ubuntu-latest]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: 22
 
-      - name: Install dependencies
-        run: npm install
 
-      - name: Build application
-        run: npm run build
+      - name: Install electron dependencies
+        run: |
+          cd electron
+          npm ci
 
-      - name: Package Electron app
-        run: npm run dist
+
+      - name: Install wine (only on Linux for Windows build)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y wine64 wine32
+
+      - name: Build electron app
+        run: |
+          cd electron
+          npm run dist
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: electron-app-${{ matrix.os }}
-          path: |
-            dist/**
+          name: build-${{ matrix.os }}
+          path: electron/dist
