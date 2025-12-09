@@ -45,8 +45,8 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "electron": "^39.2.6",
-    "electron-builder": "^26.0.12",
+    "electron": "39.2.6",
+    "electron-builder": "26.0.12",
     "jest": "^30.2.0"
   }
 }
