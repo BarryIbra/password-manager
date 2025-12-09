@@ -1,0 +1,9 @@
+{
+    "name": "password-manager",
+    "scripts": {
+        "dev": "concurrently \"npm run dev --prefix front\" \"npm run start --prefix electron\""
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
