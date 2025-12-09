@@ -2,7 +2,7 @@
     "name": "password-manager",
     "scripts": {
         "dev": "concurrently \"npm run dev --prefix front\" \"npm run start --prefix electron\"",
-        "build": "electron-builder --dir --prefix electron"
+        "build": "npm --prefix electron run build"
     },
     "devDependencies": {
         "concurrently": "^8.2.2",
