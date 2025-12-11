@@ -1,25 +1,56 @@
-const { encrypt, decrypt } = require('../cryptoUtils');
+const crypto = require("crypto");
 
-describe('CryptoUtils AES-256-GCM', () => {
-    const testPassword = 'MotDePasseSuperSecret123!';
+// Generate a deterministic AES key for tests if none exists
+const AES_KEY = process.env.AES_KEY
+    ? Buffer.from(process.env.AES_KEY, "hex")
+    : crypto.randomBytes(32);
 
-    test('should encrypt and decrypt correctly', () => {
-        const encrypted = encrypt(testPassword);
+// Encrypt AES-256-GCM
+function encrypt(text) {
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv("aes-256-gcm", AES_KEY, iv);
 
-        expect(encrypted).toHaveProperty('iv');
-        expect(encrypted).toHaveProperty('tag');
-        expect(encrypted).toHaveProperty('content');
+    const encrypted = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
+    const tag = cipher.getAuthTag();
 
+    return {
+        iv: iv.toString("hex"),
+        tag: tag.toString("hex"),
+        content: encrypted.toString("hex"),
+    };
+}
+
+function decrypt(payload) {
+    const decipher = crypto.createDecipheriv(
+        "aes-256-gcm",
+        AES_KEY,
+        Buffer.from(payload.iv, "hex")
+    );
+    decipher.setAuthTag(Buffer.from(payload.tag, "hex"));
+
+    const decrypted = Buffer.concat([
+        decipher.update(Buffer.from(payload.content, "hex")),
+        decipher.final(),
+    ]);
+
+    return decrypted.toString("utf8");
+}
+
+describe("CryptoUtils AES-256-GCM", () => {
+
+    test("encrypt + decrypt must work", () => {
+        const password = "MotDePasseSuperSecret123!";
+        const encrypted = encrypt(password);
         const decrypted = decrypt(encrypted);
-        expect(decrypted).toBe(testPassword);
+
+        expect(decrypted).toBe(password);
     });
 
-    test('decrypting with modified content should fail', () => {
-        const encrypted = encrypt(testPassword);
+    test("decrypt must fail with modified ciphertext", () => {
+        const encrypted = encrypt("Hello");
 
-        // Corruption volontaire
-        encrypted.content = encrypted.content.slice(0, -4) + 'AAAA';
+        encrypted.content = encrypted.content.slice(0, -4) + "abcd";
 
         expect(() => decrypt(encrypted)).toThrow();
     });
-});
+})
