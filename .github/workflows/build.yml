@@ -27,6 +27,11 @@ jobs:
         run: |
           cd electron
           npm ci
+          
+      - name: Run electron tests
+        run: |
+          cd electron
+          npm test
 
 
       - name: Install wine (only on Linux for Windows build)

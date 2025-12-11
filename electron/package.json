@@ -17,7 +17,9 @@
     },
     "files": [
       "**/*",
-      "!**/node_modules/.cache"
+      "!**/node_modules/.cache",
+      "!test/**/*",
+      "!dist/**/*"
     ],
     "win": {
       "target": [

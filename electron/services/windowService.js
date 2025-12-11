@@ -13,7 +13,7 @@ function createMainWindow() {
     });
 
     if (app.isPackaged) {
-        win.loadFile(path.join(process.cwd(), 'dist/index.html'));
+        win.loadFile(path.join(process.cwd(), '../dist/index.html'));
     } else {
         win.loadURL('http://localhost:5173');
     }
