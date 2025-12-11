@@ -71,3 +71,46 @@ module.exports = {
 
     async end() { }
 };
+
+// Fake in-memory DB
+let fakeUsers = [];
+
+// Reset between tests
+function __reset() {
+    fakeUsers = [];
+}
+
+module.exports = {
+    __reset,
+    async query(sql, params) {
+        // INSERT user
+        if (sql.startsWith("INSERT INTO users")) {
+            const [username, hashedPassword] = params;
+
+            // Simulate UNIQUE constraint
+            if (fakeUsers.some(u => u.username === username)) {
+                throw new Error("duplicate key value violates unique constraint");
+            }
+
+            const newUser = {
+                id: fakeUsers.length + 1,
+                username,
+                password: hashedPassword
+            };
+
+            fakeUsers.push(newUser);
+
+            return { rows: [{ id: newUser.id }] };
+        }
+
+        // SELECT user by username
+        if (sql.startsWith("SELECT * FROM users WHERE username=")) {
+            const username = params[0];
+            const found = fakeUsers.filter(u => u.username === username);
+            return { rows: found };
+        }
+
+        throw new Error("SQL query not mocked: " + sql);
+    }
+};
+
