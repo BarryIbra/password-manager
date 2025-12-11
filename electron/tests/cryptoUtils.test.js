@@ -5,6 +5,7 @@ describe('CryptoUtils AES-256-GCM', () => {
 
     test('should encrypt and decrypt correctly', () => {
         const encrypted = encrypt(testPassword);
+
         expect(encrypted).toHaveProperty('iv');
         expect(encrypted).toHaveProperty('tag');
         expect(encrypted).toHaveProperty('content');
@@ -15,7 +16,10 @@ describe('CryptoUtils AES-256-GCM', () => {
 
     test('decrypting with modified content should fail', () => {
         const encrypted = encrypt(testPassword);
-        encrypted.content = encrypted.content.slice(0, -2) + 'AA'; // corruption
+
+        // Corruption volontaire
+        encrypted.content = encrypted.content.slice(0, -4) + 'AAAA';
+
         expect(() => decrypt(encrypted)).toThrow();
     });
 });
